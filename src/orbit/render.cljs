@@ -1,7 +1,7 @@
 (ns orbit.render
   (:require 
     [ajax.core :refer [GET]]
-    [re-frame.core :as rf]
+    [re-frame.core :refer [dispatch dispatch-sync]]
     [reagent.core :as r]
     [orbit.events]
     [orbit.subs]
@@ -11,11 +11,11 @@
 (enable-console-print!)
 
 (defn render [orbit dom-target]
-  (rf/dispatch-sync [:init! orbit])
+  (dispatch-sync [:init! orbit])
   (r/render [views/orbit-view] dom-target)
   (GET (str "orbits/rustyspoon.md")
     {:handler (fn [raw-content]
-                (rf/dispatch [:set-content! raw-content]))}))
+                (dispatch [:set-content! raw-content]))}))
 
 (defonce once
   (do
