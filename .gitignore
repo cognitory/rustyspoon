@@ -1,0 +1,8 @@
+resources/public/js/**
+*.log
+target/**
+.lein-repl-history
+.nrepl-port
+*-init.clj
+.lein-failures
+Session.vim
