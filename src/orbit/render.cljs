@@ -15,8 +15,7 @@
   (r/render [views/orbit-view] dom-target)
   (GET (str "orbits/rustyspoon.md")
     {:handler (fn [raw-content]
-                (rf/dispatch [:set-content! raw-content]))})
-  #_(rf/dispatch [:set-step! 0]))
+                (rf/dispatch [:set-content! raw-content]))}))
 
 (defonce once
   (do

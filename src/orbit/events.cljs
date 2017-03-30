@@ -2,7 +2,7 @@
   (:require
     [clojure.string :as string]
     [cljs.js :refer [empty-state eval-str js-eval]]
-    [re-frame.core :as rf]))
+    [re-frame.core :refer [reg-event-fx]]))
 
 (defn- eval-code [code]
   (eval-str (empty-state)
@@ -21,27 +21,35 @@
                   (def *er x)
                   (js/console.log (str error)))))))
 
-(defn- eval-current-code [app-state step]
-  (eval-code (get-in app-state [:orbit :history step :resources "core.cljs"])))
 
-(defn set-step! [app-state [_ step]]
-  (eval-current-code app-state step)
-  (assoc app-state :step step))
+(reg-event-fx
+  :-eval-current-code
+  (fn [{db :db} [_ step]]
+    (eval-code (get-in db [:orbit :history step :resources "core.cljs"]))
+    {}))
 
-(defn init! [app-state [_ orbit]]
-  (assoc app-state :orbit orbit))
+(reg-event-fx 
+  :init! 
+  (fn [{db :db} [_ orbit]]
+    {:db (assoc db :orbit orbit)}))
 
-(rf/register-handler :init! init!)
-(rf/register-handler :set-step! set-step!)
-(rf/register-handler :set-content!
-                     (fn [app-state [_ content]]
-                          (assoc app-state :content content)))
-(rf/register-handler
+(reg-event-fx 
+  :set-step! 
+  (fn [{db :db} [_ step]]
+    {:dispatch [:-eval-current-code step]
+     :db (assoc db :step step)}))
+
+(reg-event-fx 
+  :set-content!
+  (fn [{db :db} [_ content]]
+    {:db (assoc db :content content)}))
+
+(reg-event-fx
   :set-step-by-name!
-  (fn [app-state [_ name]]
-       (let [id (->> (get-in app-state [:orbit :history])
-                     (keep-indexed (fn [idx s] (when (= name (s :step)) idx)))
-                     first)]
-         (set-step! app-state [nil id]))))
+  (fn [{db :db} [_ name]]
+    (let [id (->> (get-in db [:orbit :history])
+                  (keep-indexed (fn [idx s] (when (= name (s :step)) idx)))
+                  first)]
+      {:dispatch [:set-step! id]})))
 
 
