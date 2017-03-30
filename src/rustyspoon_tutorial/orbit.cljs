@@ -371,5 +371,5 @@
       ;... more steps
       ))
 
-(render orbit (.-body js/document))
+(render orbit (.. js/document (getElementById "rustyspoon-tutorial")))
 
